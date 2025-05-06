@@ -1,0 +1,28 @@
+livekit-agents
+livekit-plugins-openai
+livekit-plugins-silero
+python-dotenv
+livekit-api
+flask[async]
+flask
+pytest
+flask-cors
+uvicorn
+livekit-plugins-noise-cancellation~=0.2
+livekit-agents[openai,silero,deepgram,cartesia,turn-detector]~=1.0
+pytest-asyncio
+
+# OpenAI
+openai>=1.0 # For accessing OpenAI API directly (e.g., embeddings for RAG)
+
+# Supabase
+supabase>=2.0 # Official Python client for Supabase
+
+# Firebase
+firebase-admin>=6.0 # For backend verification of Firebase ID tokens (if generating LiveKit tokens in backend)
+
+# Utilities
+python-dotenv>=1.0 # For managing environment variables from .env file
+PyJWT>=2.0 # For generating/validating JWTs (e.g. LiveKit token generation if done in Python)
+
+# Web Server (Optional - if creating a Python backend helper for LiveKit token generation)

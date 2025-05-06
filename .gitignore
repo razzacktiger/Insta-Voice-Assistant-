@@ -60,6 +60,7 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+*.sqlite # General rule for sqlite databases
 
 # Flask stuff:
 instance/
@@ -135,6 +136,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+ai/ # Specific virtual environment name
 
 # Spyder project settings
 .spyderproject
@@ -172,3 +174,32 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# VSCode workspace 
+.code-workspace
+*.code-workspace
+
+# macOS specific
+.DS_Store
+
+# Temporary/test scripts (if not part of the main test suite)
+backend/test_embedding.py
+
+# Specific directory to ignore if accidentally created or truly unwanted
+/env_files/ 
+
+env_files /
+
+# Old pipenv/poetry/pdm lines can be kept or removed if not using them
+# Pipfile.lock
+# poetry.lock
+# pdm.lock
+# .pdm.toml
+# .pdm-python
+# .pdm-build/
+# __pypackages__/
+# .python-version
+# uv.lock
+
+backend/ai/
+backend/env_files/
