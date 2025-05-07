@@ -62,7 +62,7 @@
 - [x] **Table: `interaction_summaries`** (SQL script created & run).
 - [x] Enable `pgvector` extension. (Completed)
 - [x] Create SQL function `match_knowledge_articles` for vector search. (SQL script created & run)
-- [ ] Populate `knowledge_articles` with 2-3 sample SaaS FAQ chunks. Generate & store embeddings (using `db_driver.store_knowledge_base_article`).
+- [x] Populate `knowledge_articles` with 4 sample SaaS FAQ chunks using backend/populate_kb.py script. (Completed)
 - [ ] (Optional) Create a Supabase function/trigger for `user_profiles` creation on new Firebase user.
 
 ### 1.5. Database Driver (`backend/db_driver.py`)
