@@ -78,7 +78,7 @@
 
 - [x] Tool: `get_user_account_info` (Implemented & integrated with db_driver).
 - [x] Tool: `answer_from_company_kb` (Implemented & integrated with db_driver).
-- [ ] Tool: `summarize_interaction_for_next_session` (Stub exists, needs integration with `db_driver` - raises NotImplementedError).
+- [x] Tool: `summarize_interaction_for_next_session` (Implemented & integrated with db_driver).
 - [ ] Update `fn_calling_context` in agent core file.
 
 ### 1.7. Initial Prompt Engineering (`backend/prompts.py`)
@@ -93,7 +93,7 @@
   - [x] Initial tests for placeholder logic created.
   - [x] Tests for `get_user_account_info` (mocking `db_driver`) implemented and passing.
   - [x] Tests for `answer_from_company_kb` (mocking `db_driver`) implemented and passing.
-  - [ ] Tests for `summarize_interaction_for_next_session` (mocking `db_driver`) to be implemented (currently expects NotImplementedError).
+  - [x] Tests for `summarize_interaction_for_next_session` (mocking `db_driver`) implemented and passing.
 - [ ] Integration tests for API & DB interaction.
 - [ ] End-to-end MVP test (as originally listed in 1.8).
 

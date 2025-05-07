@@ -126,26 +126,36 @@ async def summarize_interaction_for_next_session(
     The LLM should call this tool when an interaction has reached a resolution
     or a significant milestone, providing a concise summary.
     """
-    logger.info(f"Summarizing interaction: {interaction_summary}")
-    raise NotImplementedError(
-        "summarize_interaction_for_next_session is not yet implemented")
+    user_id = ctx.participant.identity
+    # Assuming room SID is a good unique identifier for the session.
+    # If not, this might need to be adjusted based on how sessions are tracked.
+    session_id = ctx.room.sid if ctx.room else "unknown_session"
 
-    # TODO:
-    # 1. Determine user_id from ctx (as in get_user_account_info).
-    # 2. Call db_driver.save_interaction_summary(user_id, interaction_summary).
-    # 3. Handle potential database errors.
+    logger.info(
+        f"Attempting to save interaction summary for User: {user_id}, Session: {session_id}. Summary: '{interaction_summary}'")
 
-    # Example placeholder response
-    # user_id = ctx.participant.identity  # Placeholder
+    try:
+        success = await db_driver.save_interaction_summary(
+            user_id=user_id,
+            session_id=session_id,
+            summary_text=interaction_summary
+        )
 
-    # Simulate DB call
-    # if user_id and interaction_summary:
-    #     logger.info(
-    #         f"Successfully saved summary for user {user_id}: '{interaction_summary}' (Mocked)")
-    #     return "Okay, I've made a note of that for next time."
-    # else:
-    #     logger.error(
-    #         f"Failed to save summary for user {user_id}. Summary provided: '{interaction_summary}' (Mocked)")
-    #     return "I tried to save a note, but there was an issue. (Mocked)"
+        if success:
+            logger.info(
+                f"Successfully saved interaction summary for User: {user_id}, Session: {session_id}")
+            return "Okay, I've made a note of that for next time."
+        else:
+            logger.warning(
+                f"Failed to save interaction summary to DB (db_driver returned False) for User: {user_id}, Session: {session_id}")
+            return "I tried to save a note of our conversation, but there was an issue. Please try again later if it's important."
+
+    except DBDriverError as e:
+        logger.error(
+            f"Database error while saving interaction summary for User: {user_id}, Session: {session_id}. Error: {e}")
+        return "Sorry, I encountered a system issue while trying to save our conversation summary. Please try again later."
+
+    # Fallback, though the logic above should cover all paths defined by the tests.
+    # return "An unexpected error occurred while trying to save the summary."
 
 # We might add more tools later, e.g., for creating support tickets, etc.

@@ -223,22 +223,88 @@ async def test_answer_from_company_kb_db_error(mock_query_knowledge_base, mock_a
 
 @pytest.mark.asyncio
 @patch('backend.api.logger')
-async def test_summarize_interaction_success(mock_api_logger, mock_run_context):
+@patch('backend.api.db_driver.save_interaction_summary')
+async def test_summarize_interaction_success(mock_save_summary, mock_api_logger, mock_run_context):
     """Test successfully summarizing the interaction and saving it."""
     summary_content = "User asked about password reset and was given instructions."
-    with pytest.raises(NotImplementedError):  # Placeholder
-        await summarize_interaction_for_next_session(mock_run_context, summary_content)
-    # mock_api_logger.info.assert_any_call(f"Summarizing interaction: {summary_content}")
+    test_user_id = "user_summary_success"
+    test_session_id = "session_abc123"
+
+    mock_run_context.participant.identity = test_user_id
+    mock_run_context.room = MagicMock()
+    mock_run_context.room.sid = test_session_id
+
+    mock_save_summary.return_value = True  # Simulate successful save
+
+    expected_response = "Okay, I've made a note of that for next time."
+
+    actual_response = await summarize_interaction_for_next_session(mock_run_context, summary_content)
+
+    mock_api_logger.info.assert_any_call(
+        f"Attempting to save interaction summary for User: {test_user_id}, Session: {test_session_id}. Summary: '{summary_content}'")
+    mock_save_summary.assert_called_once_with(
+        user_id=test_user_id, session_id=test_session_id, summary_text=summary_content)
+    assert actual_response == expected_response
+    mock_api_logger.info.assert_any_call(
+        f"Successfully saved interaction summary for User: {test_user_id}, Session: {test_session_id}")
 
 
 @pytest.mark.asyncio
 @patch('backend.api.logger')
-async def test_summarize_interaction_db_error(mock_api_logger, mock_run_context):
-    """Test handling for a database error when trying to save the summary."""
-    summary_content = ""
-    with pytest.raises(NotImplementedError):  # Placeholder
-        await summarize_interaction_for_next_session(mock_run_context, summary_content)
-    # mock_api_logger.info.assert_any_call(f"Summarizing interaction: {summary_content}")
+@patch('backend.api.db_driver.save_interaction_summary')
+async def test_summarize_interaction_save_fails(mock_save_summary, mock_api_logger, mock_run_context):
+    """Test handling for when saving the summary fails (db_driver returns False)."""
+    summary_content = "User was unhappy with the resolution."
+    test_user_id = "user_summary_fail_save"
+    test_session_id = "session_def456"
+
+    mock_run_context.participant.identity = test_user_id
+    mock_run_context.room = MagicMock()
+    mock_run_context.room.sid = test_session_id
+
+    mock_save_summary.return_value = False  # Simulate save failure
+
+    expected_response = "I tried to save a note of our conversation, but there was an issue. Please try again later if it's important."
+
+    actual_response = await summarize_interaction_for_next_session(mock_run_context, summary_content)
+
+    mock_api_logger.info.assert_any_call(
+        f"Attempting to save interaction summary for User: {test_user_id}, Session: {test_session_id}. Summary: '{summary_content}'")
+    mock_save_summary.assert_called_once_with(
+        user_id=test_user_id, session_id=test_session_id, summary_text=summary_content)
+    assert actual_response == expected_response
+    mock_api_logger.warning.assert_any_call(
+        f"Failed to save interaction summary to DB (db_driver returned False) for User: {test_user_id}, Session: {test_session_id}")
+
+
+@pytest.mark.asyncio
+@patch('backend.api.logger')
+@patch('backend.api.db_driver.save_interaction_summary')
+async def test_summarize_interaction_db_driver_error(mock_save_summary, mock_api_logger, mock_run_context):
+    """Test handling for DBDriverError when trying to save the summary."""
+    summary_content = "Critical interaction details."
+    test_user_id = "user_summary_db_error"
+    test_session_id = "session_ghi789"
+    simulated_db_error_message = "Simulated DB error during summary save"
+
+    mock_run_context.participant.identity = test_user_id
+    mock_run_context.room = MagicMock()
+    mock_run_context.room.sid = test_session_id
+
+    mock_save_summary.side_effect = DBDriverError(simulated_db_error_message)
+
+    expected_response = "Sorry, I encountered a system issue while trying to save our conversation summary. Please try again later."
+
+    actual_response = await summarize_interaction_for_next_session(mock_run_context, summary_content)
+
+    mock_api_logger.info.assert_any_call(
+        f"Attempting to save interaction summary for User: {test_user_id}, Session: {test_session_id}. Summary: '{summary_content}'")
+    mock_save_summary.assert_called_once_with(
+        user_id=test_user_id, session_id=test_session_id, summary_text=summary_content)
+    assert actual_response == expected_response
+    mock_api_logger.error.assert_any_call(
+        f"Database error while saving interaction summary for User: {test_user_id}, Session: {test_session_id}. Error: {simulated_db_error_message}")
+
 
 # We'll also need a test for the Firebase token verification if we build that into a tool
 # and tests for the Supabase DB driver functions.
