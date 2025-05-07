@@ -12,7 +12,8 @@ from backend.db_driver import (
     generate_embedding,
     query_knowledge_base,
     store_knowledge_base_article,
-    save_interaction_summary
+    save_interaction_summary,
+    DBDriverError  # Import DBDriverError
 )
 
 # --- Fixtures (if any common setup needed) ---
@@ -81,29 +82,34 @@ async def test_get_user_account_info_not_found(mock_supabase_client, mock_db_log
 @patch('backend.db_driver.logger')
 @patch('backend.db_driver.supabase')
 async def test_get_user_account_info_db_error(mock_supabase_client, mock_db_logger):
-    """Test Supabase DB error."""
+    """Test Supabase DB error should raise DBDriverError."""
     mock_user_id = "user_db_error"
-    mock_execute = MagicMock()
-    mock_execute.data = None
-    mock_execute.error = MagicMock(
-        message="Simulated DB Error")  # Simulate an error object
-    # More robust way to simulate exception during execute:
-    mock_supabase_client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.side_effect = Exception(
-        "Simulated DB Exception")
+    simulated_exception = Exception("Simulated DB Exception")
 
-    result = await get_user_account_info_from_db(mock_user_id)
-    assert result is None
+    # Simulate exception during execute:
+    mock_supabase_client.table.return_value.select.return_value.eq.return_value.maybe_single.return_value.execute.side_effect = simulated_exception
+
+    with pytest.raises(DBDriverError) as excinfo:
+        await get_user_account_info_from_db(mock_user_id)
+
+    assert f"Error fetching user account info for {mock_user_id} from Supabase: {simulated_exception}" in str(
+        excinfo.value)
+    # Check that the original error was logged before DBDriverError was raised
     mock_db_logger.error.assert_called_once_with(
-        f"Error fetching user account info for {mock_user_id} from Supabase: {Exception('Simulated DB Exception')}")
+        f"Error fetching user account info for {mock_user_id} from Supabase: {simulated_exception}")
 
 
 @pytest.mark.asyncio
 @patch('backend.db_driver.logger')
 @patch('backend.db_driver.supabase', None)
 async def test_get_user_account_info_supabase_not_initialized(mock_db_logger):
-    """Test when Supabase client is None."""
-    result = await get_user_account_info_from_db("any_user")
-    assert result is None
+    """Test when Supabase client is None should raise DBDriverError."""
+    with pytest.raises(DBDriverError) as excinfo:
+        await get_user_account_info_from_db("any_user")
+
+    assert "Supabase client not initialized. Cannot fetch user info." in str(
+        excinfo.value)
+    # Check that the error was logged before DBDriverError was raised
     mock_db_logger.error.assert_called_once_with(
         "Supabase client not initialized. Cannot fetch user info.")
 

@@ -10,6 +10,13 @@ load_dotenv()  # Load environment variables from .env
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+# Custom Exception for DB Driver issues
+
+
+class DBDriverError(Exception):
+    pass
+
+
 # Initialize Supabase client
 SUPABASE_URL: Optional[str] = os.environ.get("SUPABASE_URL")
 # Use service role key for backend operations
@@ -48,11 +55,13 @@ async def get_user_account_info_from_db(user_id: str) -> Optional[Dict[str, Any]
     """
     Retrieves user account information from the 'users' table in Supabase.
     Assumes user_id is the primary key or a unique identifier in your 'users' table.
+    Raises DBDriverError if the Supabase client is not initialized or if there's a database exception.
+    Returns None if the user is not found.
     """
     if not supabase:
-        logger.error(
-            "Supabase client not initialized. Cannot fetch user info.")
-        return None
+        err_msg = "Supabase client not initialized. Cannot fetch user info."
+        logger.error(err_msg)
+        raise DBDriverError(err_msg)
     try:
         # This is a synchronous call in supabase-py v2 when using the default client
         response = supabase.table('user_profiles').select(
@@ -67,9 +76,9 @@ async def get_user_account_info_from_db(user_id: str) -> Optional[Dict[str, Any]
                 f"No user account info found for user_id: {user_id}")
             return None
     except Exception as e:
-        logger.error(
-            f"Error fetching user account info for {user_id} from Supabase: {e}")
-        return None
+        err_msg = f"Error fetching user account info for {user_id} from Supabase: {e}"
+        logger.error(err_msg)
+        raise DBDriverError(err_msg)
 
 # --- Knowledge Base (RAG) Functions ---
 
