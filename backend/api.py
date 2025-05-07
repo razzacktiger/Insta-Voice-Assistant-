@@ -65,22 +65,55 @@ async def answer_from_company_kb(
     """Searches the company knowledge base (KB) for an answer to the user's query.
     Use this tool for general questions about the company, its products, FAQs, or how-to guides.
     """
-    logger.info(f"Answering from KB. Query: {query}")
-    raise NotImplementedError("answer_from_company_kb is not yet implemented")
+    user_id = ctx.participant.identity  # Get user_id for logging
+    logger.info(
+        f"Attempting to answer from KB. User: {user_id}, Query: '{query}'")
 
-    # TODO:
-    # 1. Call db_driver.query_knowledge_base(query) which will handle embedding the query
-    #    and searching the vector DB (Supabase with pgvector).
-    # 2. Format the retrieved information into a coherent answer.
-    # 3. Handle cases where no relevant information is found or a database error occurs.
+    try:
+        articles = await db_driver.query_knowledge_base(query)
 
-    # Example placeholder response
-    # if "password" in query.lower():
-    #     return "To reset your password, go to the login page and click 'Forgot Password'. (Mocked from KB)"
-    # elif "feature x" in query.lower():
-    #     return "Feature X allows you to do amazing things with our product! (Mocked from KB)"
-    # else:
-    #     return "I couldn't find specific information about that in our knowledge base right now. Is there anything else I can help with? (Mocked)"
+        if not articles:  # Handles None or empty list
+            logger.warning(
+                f"No KB articles found for query: '{query}'. User: {user_id}")
+            return "I couldn't find specific information about that in our knowledge base. Could you try rephrasing, or is there something else I can help with?"
+
+        if len(articles) == 1:
+            article = articles[0]
+            # Ensure title and content exist, providing defaults if not (though db should ideally guarantee them)
+            title = article.get('title', 'N/A')
+            content = article.get('content', 'No content available.')
+            response = (
+                "I found this in our knowledge base:\n\n"
+                f"Title: {title}\n"
+                f"Content: {content}"
+            )
+            logger.info(
+                f"Successfully found 1 article for query: '{query}'. User: {user_id}")
+            return response
+        else:
+            formatted_articles = []
+            for article in articles:
+                title = article.get('title', 'N/A')
+                content = article.get('content', 'No content available.')
+                formatted_articles.append(
+                    f"Title: {title}\nContent: {content}")
+
+            # Corrected response construction for multiple articles
+            response_header = "Here's what I found in our knowledge base related to your query:\n\n"
+            articles_string = "\n\n---\n\n".join(formatted_articles)
+            response = response_header + articles_string
+
+            logger.info(
+                f"Successfully found {len(articles)} articles for query: '{query}'. User: {user_id}")
+            return response
+
+    except DBDriverError as e:
+        logger.error(
+            f"Database error during KB query for User: {user_id}, Query: '{query}'. Error: {e}")
+        return "Sorry, I encountered an issue trying to search our knowledge base. Please try again later."
+
+    # Fallback, though logic above should cover all path defined by tests
+    # return "I was unable to process your request to the knowledge base at this time."
 
 
 @function_tool()

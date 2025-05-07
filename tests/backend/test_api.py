@@ -107,45 +107,116 @@ async def test_get_user_account_info_db_driver_exception(mock_get_user_from_db, 
 
 @pytest.mark.asyncio
 @patch('backend.api.logger')
-async def test_answer_from_company_kb_found_password(mock_api_logger, mock_run_context):
-    """Test successfully finding and returning an answer from the KB (password case)."""
+@patch('backend.api.db_driver.query_knowledge_base')
+async def test_answer_from_company_kb_found_password(mock_query_knowledge_base, mock_api_logger, mock_run_context):
+    """Test successfully finding and returning a single answer from the KB."""
     user_query = "How do I reset my password?"
-    # This test will fail until answer_from_company_kb is updated
-    # For now, just keeping the structure
-    with pytest.raises(NotImplementedError):  # Placeholder, will be removed
-        await answer_from_company_kb(mock_run_context, user_query)
-    # mock_api_logger.info.assert_any_call(f"Answering from KB. Query: {user_query}")
+    mock_run_context.participant.identity = "test_user_kb_search"
+
+    kb_article = {
+        'title': 'Password Reset Procedure',
+        'content': 'To reset your password, please visit the account recovery page and follow the instructions.',
+        # 'similarity_score': 0.9 # db_driver might return this, api layer might not use it directly in response
+    }
+    # db_driver.query_knowledge_base returns a list
+    mock_query_knowledge_base.return_value = [kb_article]
+
+    expected_response = (
+        "I found this in our knowledge base:\n\n"
+        f"Title: {kb_article['title']}\n"
+        f"Content: {kb_article['content']}"
+    )
+
+    actual_response = await answer_from_company_kb(mock_run_context, user_query)
+
+    mock_api_logger.info.assert_any_call(
+        f"Attempting to answer from KB. User: test_user_kb_search, Query: '{user_query}'")
+    mock_query_knowledge_base.assert_called_once_with(user_query)
+    assert actual_response == expected_response
+    # We could also add a log for successful retrieval if desired
+    # mock_api_logger.info.assert_any_call(f"Successfully found 1 article(s) for query: '{user_query}'")
 
 
 @pytest.mark.asyncio
 @patch('backend.api.logger')
-async def test_answer_from_company_kb_found_feature_x(mock_api_logger, mock_run_context):
-    """Test successfully finding and returning an answer from the KB (feature x case)."""
+@patch('backend.api.db_driver.query_knowledge_base')
+async def test_answer_from_company_kb_found_multiple_articles(mock_query_knowledge_base, mock_api_logger, mock_run_context):
+    """Test successfully finding and returning multiple articles from the KB."""
     user_query = "Tell me about feature x"
-    with pytest.raises(NotImplementedError):  # Placeholder
-        await answer_from_company_kb(mock_run_context, user_query)
-    # mock_api_logger.info.assert_any_call(f"Answering from KB. Query: {user_query}")
+    mock_run_context.participant.identity = "test_user_multi_article"
+
+    kb_articles = [
+        {
+            'title': 'Feature X Overview',
+            'content': 'Feature X is a revolutionary new tool that helps you achieve your goals.'
+        },
+        {
+            'title': 'Getting Started with Feature X',
+            'content': 'To start using Feature X, navigate to the dashboard and click the Feature X button.'
+        }
+    ]
+    mock_query_knowledge_base.return_value = kb_articles
+
+    expected_response = (
+        "Here's what I found in our knowledge base related to your query:\n\n"
+        f"Title: {kb_articles[0]['title']}\nContent: {kb_articles[0]['content']}\n\n"
+        "---\n\n"
+        f"Title: {kb_articles[1]['title']}\nContent: {kb_articles[1]['content']}"
+    )
+
+    actual_response = await answer_from_company_kb(mock_run_context, user_query)
+
+    mock_api_logger.info.assert_any_call(
+        f"Attempting to answer from KB. User: test_user_multi_article, Query: '{user_query}'")
+    mock_query_knowledge_base.assert_called_once_with(user_query)
+    assert actual_response == expected_response
+    # mock_api_logger.info.assert_any_call(f"Successfully found {len(kb_articles)} article(s) for query: '{user_query}'")
 
 
 @pytest.mark.asyncio
 @patch('backend.api.logger')
-async def test_answer_from_company_kb_not_found(mock_api_logger, mock_run_context):
+@patch('backend.api.db_driver.query_knowledge_base')
+async def test_answer_from_company_kb_not_found(mock_query_knowledge_base, mock_api_logger, mock_run_context):
     """Test handling when no relevant information is found in the KB."""
-    user_query = "What is the meaning of life?"
-    with pytest.raises(NotImplementedError):  # Placeholder
-        await answer_from_company_kb(mock_run_context, user_query)
-    # mock_api_logger.info.assert_any_call(f"Answering from KB. Query: {user_query}")
+    user_query = "What is the meaning of plumbus?"
+    mock_run_context.participant.identity = "test_user_kb_not_found"
+
+    mock_query_knowledge_base.return_value = None  # Simulate no articles found
+
+    expected_response = "I couldn't find specific information about that in our knowledge base. Could you try rephrasing, or is there something else I can help with?"
+
+    actual_response = await answer_from_company_kb(mock_run_context, user_query)
+
+    mock_api_logger.info.assert_any_call(
+        f"Attempting to answer from KB. User: test_user_kb_not_found, Query: '{user_query}'")
+    mock_query_knowledge_base.assert_called_once_with(user_query)
+    assert actual_response == expected_response
+    mock_api_logger.warning.assert_any_call(
+        f"No KB articles found for query: '{user_query}'. User: test_user_kb_not_found")
 
 
 @pytest.mark.asyncio
 @patch('backend.api.logger')
-async def test_answer_from_company_kb_db_error(mock_api_logger, mock_run_context):
-    """Test handling for a database/RAG error during KB lookup."""
-    user_query = "Tell me about product Y."
-    with pytest.raises(NotImplementedError):  # Placeholder
-        await answer_from_company_kb(mock_run_context, user_query)
-    # mock_api_logger.info.assert_any_call(f"Answering from KB. Query: {user_query}")
-    pass
+@patch('backend.api.db_driver.query_knowledge_base')
+async def test_answer_from_company_kb_db_error(mock_query_knowledge_base, mock_api_logger, mock_run_context):
+    """Test handling for a DBDriverError during KB lookup."""
+    user_query = "Tell me about product Y with a DB error."
+    mock_run_context.participant.identity = "test_user_kb_db_error"
+    simulated_db_error_message = "Simulated DB error during KB query"
+
+    mock_query_knowledge_base.side_effect = DBDriverError(
+        simulated_db_error_message)
+
+    expected_response = "Sorry, I encountered an issue trying to search our knowledge base. Please try again later."
+
+    actual_response = await answer_from_company_kb(mock_run_context, user_query)
+
+    mock_api_logger.info.assert_any_call(
+        f"Attempting to answer from KB. User: test_user_kb_db_error, Query: '{user_query}'")
+    mock_query_knowledge_base.assert_called_once_with(user_query)
+    assert actual_response == expected_response
+    mock_api_logger.error.assert_any_call(
+        f"Database error during KB query for User: test_user_kb_db_error, Query: '{user_query}'. Error: {simulated_db_error_message}")
 
 # --- Tests for summarize_interaction_for_next_session ---
 

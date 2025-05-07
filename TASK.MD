@@ -77,7 +77,7 @@
 ### 1.6. Tool Implementation (`backend/api.py`)
 
 - [x] Tool: `get_user_account_info` (Implemented & integrated with db_driver).
-- [ ] Tool: `answer_from_company_kb` (Stub exists, needs integration with `db_driver` - raises NotImplementedError).
+- [x] Tool: `answer_from_company_kb` (Implemented & integrated with db_driver).
 - [ ] Tool: `summarize_interaction_for_next_session` (Stub exists, needs integration with `db_driver` - raises NotImplementedError).
 - [ ] Update `fn_calling_context` in agent core file.
 
@@ -92,7 +92,7 @@
 - [x] Unit tests for `backend/api.py`:
   - [x] Initial tests for placeholder logic created.
   - [x] Tests for `get_user_account_info` (mocking `db_driver`) implemented and passing.
-  - [ ] Tests for `answer_from_company_kb` (mocking `db_driver`) to be implemented (currently expects NotImplementedError).
+  - [x] Tests for `answer_from_company_kb` (mocking `db_driver`) implemented and passing.
   - [ ] Tests for `summarize_interaction_for_next_session` (mocking `db_driver`) to be implemented (currently expects NotImplementedError).
 - [ ] Integration tests for API & DB interaction.
 - [ ] End-to-end MVP test (as originally listed in 1.8).
