@@ -203,3 +203,6 @@ env_files /
 
 backend/ai/
 backend/env_files/
+
+# Environment variables specific to frontend
+frontend/.env
