@@ -21,27 +21,27 @@
   - `PyJWT`
   - `firebase-admin`
   - `pytest`, `pytest-asyncio` (for testing)
-- [ ] Create/update `frontend/package.json` (or equivalent for chosen framework).
+- [x] Create/update `frontend/package.json` (or equivalent for chosen framework). (Completed)
   - `livekit-client`
   - `firebase` (for Firebase Web SDK)
-- [ ] Create/update `.env.example` (for backend) & frontend environment example. (Backend `.env.example` still needed)
+- [x] Create/update `.env.example` (for backend) & frontend environment example. (Completed)
 - [x] Populate `backend/.env` (OpenAI, Supabase URL & Key - Completed for current needs).
-- [ ] Populate frontend environment variables (Firebase Web SDK config).
+- [x] Populate frontend environment variables (Firebase Web SDK config). (Completed)
 
 ### 1.2. Authentication & Frontend Shell
 
-- [ ] Set up Firebase project.
-- [ ] Enable Firebase Authentication (e.g., Google Sign-In and/or Email/Password).
-- [ ] **Frontend**: Create basic frontend shell (e.g., React app).
-  - Implement login page/component using Firebase Web SDK.
-  - After login, store Firebase ID token.
-- [ ] **Backend Helper (Optional but Recommended)**: Create a simple backend endpoint that:
-  - Accepts Firebase ID token from frontend.
-  - Verifies Firebase ID token (using `firebase-admin`).
-  - Generates a LiveKit access token.
-  - Returns LiveKit token to frontend.
-- **Frontend**: Use the LiveKit token to connect to a room.
-- **Test**: User can log in, get LiveKit token, and (conceptually) connect.
+- [x] Set up Firebase project. (Completed by user)
+- [x] Enable Firebase Authentication (e.g., Google Sign-In and/or Email/Password). (Completed by user)
+- [x] **Frontend**: Create basic frontend shell (e.g., React app). (Completed)
+  - [x] Implement login page/component using Firebase Web SDK. (Completed)
+  - [x] After login, store Firebase ID token. (Completed)
+- [x] **Backend Helper (LiveKit Token Service - `backend/token_service.py`)**: (Completed)
+  - [x] Accepts Firebase ID token from frontend. (Completed)
+  - [x] Verifies Firebase ID token (using `firebase-admin`). (Completed)
+  - [x] Generates a LiveKit access token (compatible with `livekit-api==1.0.2`). (Completed)
+  - [x] Returns LiveKit token to frontend. (Completed & Tested via curl)
+- **Frontend**: Use the LiveKit token to connect to a room. (PENDING - Frontend task)
+- **Test**: User can log in, get LiveKit token from `token_service.py`, and (conceptually) connect. (Backend part tested, full test pending frontend integration)
 
 ### 1.3. LiveKit Agent Core (`backend/main.py` or `backend/agent_entry.py` - TBD)
 

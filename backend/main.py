@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 
 from livekit import agents
 from livekit.agents import AgentSession, Agent, RoomInputOptions
+from prompts import INSTRUCTIONS
 from livekit.plugins import (
     openai,
     noise_cancellation,
@@ -12,7 +13,7 @@ load_dotenv()
 
 class Assistant(Agent):
     def __init__(self) -> None:
-        super().__init__(instructions="You are a helpful voice AI assistant.")
+        super().__init__(instructions=INSTRUCTIONS)
 
 
 async def entrypoint(ctx: agents.JobContext):

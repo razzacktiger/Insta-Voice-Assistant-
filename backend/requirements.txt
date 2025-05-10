@@ -3,8 +3,6 @@ livekit-plugins-openai
 livekit-plugins-silero
 python-dotenv
 livekit-api
-flask[async]
-flask
 pytest
 flask-cors
 uvicorn
@@ -26,3 +24,4 @@ python-dotenv>=1.0 # For managing environment variables from .env file
 PyJWT>=2.0 # For generating/validating JWTs (e.g. LiveKit token generation if done in Python)
 
 # Web Server (Optional - if creating a Python backend helper for LiveKit token generation)
+fastapi>=0.100.0 # Or your preferred recent version
