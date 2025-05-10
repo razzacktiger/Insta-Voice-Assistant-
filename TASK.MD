@@ -45,14 +45,14 @@
 
 ### 1.3. LiveKit Agent Core (`backend/main.py` or `backend/agent_entry.py` - TBD)
 
-- [ ] Use `AgentSession` and `Agent`.
-- [ ] Configure `openai.realtime.RealtimeModel`.
-- [ ] Configure `openai.TTS` for `session.say()`.
-- [ ] Configure `silero.VAD`.
-- [ ] `WELCOME_MESSAGE` via `session.say()`.
+- [x] Use `AgentSession` and `Agent`. (Completed in `backend/main.py`)
+- [~] Configure `openai.realtime.RealtimeModel`. (Basic config done, further refinement may be needed)
+- [ ] Configure `openai.TTS` for `session.say()`. (PENDING)
+- [x] Configure `silero.VAD`. (Integrated in `AgentSession`, basic startup tested)
+- [ ] `WELCOME_MESSAGE` via `session.say()`. (Currently uses `generate_reply`, PENDING update if `session.say` with dedicated TTS is preferred)
 - [x] Update `backend/prompts.py` with `INSTRUCTIONS` for SaaS support. (Completed)
-- [ ] Agent entrypoint should access `ctx.room.name` and `ctx.participant.identity`.
-- [ ] Store `user_id` from `ctx.participant.identity` into `ctx.userdata`.
+- [x] Agent entrypoint should access `ctx.room.name` and `ctx.participant.identity`. (Implemented in `backend/main.py`)
+- [x] Store `user_id` from `ctx.participant.identity` into `ctx.userdata`. (Implemented in `backend/main.py`)
 
 ### 1.4. Supabase Setup (User Data & KB)
 
@@ -79,7 +79,7 @@
 - [x] Tool: `get_user_account_info` (Implemented & integrated with db_driver).
 - [x] Tool: `answer_from_company_kb` (Implemented & integrated with db_driver).
 - [x] Tool: `summarize_interaction_for_next_session` (Implemented & integrated with db_driver).
-- [ ] Update `fn_calling_context` in agent core file.
+- [x] Update `fn_calling_context` in agent core file. (Completed - Tools from `api.py` are now imported and passed to the Agent in `backend/main.py`, agent starts successfully.)
 
 ### 1.7. Initial Prompt Engineering (`backend/prompts.py`)
 
