@@ -140,7 +140,7 @@ This guide explains how to set up and run the entire Insta-Voice-Assistant proje
     - **B. LiveKit Agent (`main.py`):**
       - From the project root (`Insta-Voice-Assistant-/`):
         ```bash
-        python backend/main.py
+        python -m backend/main.py
         ```
       - This is the AI voice assistant that will connect to LiveKit rooms.
 

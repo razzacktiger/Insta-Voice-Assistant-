@@ -32,6 +32,8 @@ async def get_user_account_info(
     user_id = ctx.participant.identity
     logger.info(
         f"Attempting to get user account info for participant: {user_id}")
+    logger.info(
+        f"RunContext participant details: SID={ctx.participant.sid}, Identity={ctx.participant.identity}, Name={ctx.participant.name}, Metadata='{ctx.participant.metadata}'")
 
     try:
         # Call db_driver to get user account information

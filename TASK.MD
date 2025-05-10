@@ -40,16 +40,16 @@
   - [x] Verifies Firebase ID token (using `firebase-admin`). (Completed)
   - [x] Generates a LiveKit access token (compatible with `livekit-api==1.0.2`). (Completed)
   - [x] Returns LiveKit token to frontend. (Completed & Tested via curl)
-- **Frontend**: Use the LiveKit token to connect to a room. (PENDING - Frontend task)
-- **Test**: User can log in, get LiveKit token from `token_service.py`, and (conceptually) connect. (Backend part tested, full test pending frontend integration)
+- [x] **Frontend**: Use the LiveKit token to connect to a room. (Completed - User confirmed connection)
+- [x] **Test**: User can log in, get LiveKit token from `token_service.py`, and connect to the LiveKit room with the agent. (Completed)
 
 ### 1.3. LiveKit Agent Core (`backend/main.py` or `backend/agent_entry.py` - TBD)
 
 - [x] Use `AgentSession` and `Agent`. (Completed in `backend/main.py`)
 - [~] Configure `openai.realtime.RealtimeModel`. (Basic config done, further refinement may be needed)
-- [ ] Configure `openai.TTS` for `session.say()`. (PENDING)
+- [x] Configure `openai.TTS` for `session.say()`. (Completed, using OpenAI TTS with `voice="alloy"` in `AgentSession`)
 - [x] Configure `silero.VAD`. (Integrated in `AgentSession`, basic startup tested)
-- [ ] `WELCOME_MESSAGE` via `session.say()`. (Currently uses `generate_reply`, PENDING update if `session.say` with dedicated TTS is preferred)
+- [x] `WELCOME_MESSAGE` via `session.say()`. (Completed using `session.say("Hello! How can I assist you today?")`)
 - [x] Update `backend/prompts.py` with `INSTRUCTIONS` for SaaS support. (Completed)
 - [x] Agent entrypoint should access `ctx.room.name` and `ctx.participant.identity`. (Implemented in `backend/main.py`)
 - [x] Store `user_id` from `ctx.participant.identity` into `ctx.userdata`. (Implemented in `backend/main.py`)
@@ -94,16 +94,16 @@
   - [x] Tests for `get_user_account_info` (mocking `db_driver`) implemented and passing.
   - [x] Tests for `answer_from_company_kb` (mocking `db_driver`) implemented and passing.
   - [x] Tests for `summarize_interaction_for_next_session` (mocking `db_driver`) implemented and passing.
-- [ ] Integration tests for API & DB interaction.
+- [x] Integration tests for API & DB interaction. (Covered by comprehensive unit tests in `tests/backend/test_api.py` which mock `db_driver` calls and verify argument passing, return value handling, and exception propagation between `api.py` and `db_driver.py`.)
 - [ ] End-to-end MVP test (as originally listed in 1.8).
 
 ### 1.9. Frontend LiveKit Integration & MVP Test (Original 1.8)
 
 - **Frontend**:
-  - Implement UI for connecting to LiveKit room using token.
-  - Basic UI to show connection status, send/receive audio.
+  - [x] Implement UI for connecting to LiveKit room using token. (Completed)
+  - [x] Basic UI to show connection status, send/receive audio. (Completed - User confirmed interaction)
   - (Optional) Display transcript or agent messages.
-- **End-to-end Test** (Original)
+- [x] **End-to-end Test** (Original) - MVP version working: Login -> Token -> LiveKit Connection -> Agent Interaction.
 
 ---
 

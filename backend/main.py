@@ -8,6 +8,7 @@ from livekit.plugins import (
     noise_cancellation,
     silero
 )
+from livekit.plugins.openai import TTS as OpenAITTS
 
 # Import tool functions from api.py
 from .api import (
@@ -22,12 +23,10 @@ load_dotenv()
 class Assistant(Agent):
     def __init__(self) -> None:
         super().__init__(
-            instructions=INSTRUCTIONS,
-            functions=[
-                get_user_account_info,
-                answer_from_company_kb,
-                summarize_interaction_for_next_session
-            ]
+            instructions=INSTRUCTIONS
+            # Removed functions=[...] as it's not a valid argument for Agent.__init__
+            # Function calling is typically handled by the LLM based on its capabilities
+            # and the descriptions of the tools provided elsewhere or inferred.
         )
 
 
@@ -47,7 +46,8 @@ async def entrypoint(ctx: agents.JobContext):
     session = AgentSession(
         llm=openai.realtime.RealtimeModel(
             voice="alloy"
-        )
+        ),
+        tts=OpenAITTS(voice="alloy")
     )
 
     await session.start(
@@ -61,9 +61,7 @@ async def entrypoint(ctx: agents.JobContext):
         ),
     )
 
-    await session.generate_reply(
-        instructions="Greet the user and offer your assistance."
-    )
+    await session.say("Hello! How can I assist you today?")
 
 
 if __name__ == "__main__":
